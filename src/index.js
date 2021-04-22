@@ -5,40 +5,53 @@ import reportWebVitals from './reportWebVitals';
 import { ApolloClient,ApolloProvider, InMemoryCache, useQuery, gql } from '@apollo/client';
 
 
-const EXCHANGE_RATES = gql`
-  query GetExchangeRates {
-    rates(currency: "USD") {
-      currency
-      rate
+const LAUNCHES = gql`
+query Getlaunches {
+  launches(limit: 5) {
+    launch_success
+    rocket {
+      rocket_name
     }
+    links {
+      video_link
+    }
+    details
   }
+}
 `;
 
-function ExchangeRates() {
-  const { loading, error, data } = useQuery(EXCHANGE_RATES);
+function Launches() {
+  const { loading, error, data } = useQuery(LAUNCHES);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
-  return data.rates.map(({ currency, rate }) => (
-    <div key={currency}>
+  return data.launches.map(({ launch, rocket,i }) => (
+    <div key={i}>
       <p>
-        {currency}: {rate}
+        {launch}: {rocket.rocket_name}
       </p>
     </div>
   ));
 }
 const client = new ApolloClient({
-  uri: 'https://48p1r2roz4.sse.codesandbox.io',
+  uri: 'https://api.spacex.land/graphql/',
   cache: new InMemoryCache()
 });
 
 client
   .query({
     query: gql`
-      query GetRates {
-        rates(currency: "USD") {
-          currency
+      query Getlaunches {
+        launches(limit: 5) {
+          launch_success
+          rocket {
+            rocket_name
+          }
+          links {
+            video_link
+          }
+          details
         }
       }
     `
@@ -56,7 +69,7 @@ client
 ReactDOM.render(
   <ApolloProvider client={client}>
   <App />
-  <ExchangeRates/>
+  <Launches/>
   </ApolloProvider>,
   document.getElementById('root')
 );
